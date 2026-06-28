@@ -2,6 +2,12 @@
 
 A Django-based web application to manage projects, tasks, and users with role-based access control.
 
+
+## users (login credentials)
+        ADMIN - username --- admin2  , pw - Admin@123
+        Developer -- username -- developer10 , pw - Password@123
+
+        
 ## Tech Stack
 - Python 3.10+
 - Django 4.2.7
