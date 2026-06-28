@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} — PMS{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-card" style="max-width:600px;">
+  <div class="p-4 border-bottom">
+    <h6 class="fw-bold mb-0">
+      {{ title }}{% if task %} — <span class="text-muted fw-normal">{{ task.title }}</span>{% endif %}
+    </h6>
+    {% if not user.is_admin %}
+      <p class="text-muted mb-0 mt-1" style="font-size:13px;">You can only update the task status.</p>
+    {% endif %}
+  </div>
+  <div class="p-4">
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="mb-3">
+        <label class="form-label fw-semibold" style="font-size:14px;">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+          {% for error in field.errors %}
+            <div class="text-danger" style="font-size:13px;">{{ error }}</div>
+          {% endfor %}
+        {% endif %}
+      </div>
+      {% endfor %}
+      <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-primary" style="background:#6366f1; border-color:#6366f1;">Save</button>
+        <a href="{% url 'task_list' %}" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Projects — PMS{% endblock %}
+{% block page_title %}Projects{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <p class="text-muted mb-0" style="font-size:14px;">Manage and track all projects</p>
+  {% if user.is_admin %}
+  <a href="{% url 'project_create' %}" class="btn btn-primary btn-sm" style="background:#6366f1; border-color:#6366f1;">
+    <i class="bi bi-plus-lg me-1"></i> New Project
+  </a>
+  {% endif %}
+</div>
+
+<!-- Search -->
+<form class="mb-4 d-flex gap-2" method="get">
+  <input type="text" name="q" value="{{ query }}" class="form-control" style="max-width:320px;" placeholder="Search projects...">
+  <button class="btn btn-outline-secondary btn-sm px-3">Search</button>
+  {% if query %}<a href="{% url 'project_list' %}" class="btn btn-outline-danger btn-sm">Clear</a>{% endif %}
+</form>
+
+<div class="row g-3">
+  {% for project in projects %}
+  <div class="col-md-4">
+    <div class="page-card h-100 d-flex flex-column">
+      <div class="p-4 flex-grow-1">
+        <h6 class="fw-bold mb-2">{{ project.name }}</h6>
+        <p class="text-muted mb-3" style="font-size:13px;">{{ project.description|truncatechars:90|default:'No description.' }}</p>
+        <div class="d-flex gap-3" style="font-size:13px; color:#64748b;">
+          <span><i class="bi bi-list-task me-1"></i>{{ project.task_count }} tasks</span>
+          <span><i class="bi bi-check2-circle me-1 text-success"></i>{{ project.completed_tasks }} done</span>
+        </div>
+      </div>
+      <div class="px-4 py-3 border-top d-flex gap-2">
+        <a href="{% url 'project_detail' project.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+        {% if user.is_admin %}
+        <a href="{% url 'project_edit' project.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+        <a href="{% url 'project_delete' project.pk %}" class="btn btn-sm btn-outline-danger ms-auto">Delete</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="page-card p-5 text-center text-muted">
+      <i class="bi bi-folder-x fs-1 d-block mb-2"></i>
+      No projects found.
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if projects.has_other_pages %}
+<nav class="mt-4">
+  <ul class="pagination pagination-sm">
+    {% if projects.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{ projects.previous_page_number }}&q={{ query }}">Previous</a></li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">Page {{ projects.number }} of {{ projects.paginator.num_pages }}</span></li>
+    {% if projects.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ projects.next_page_number }}&q={{ query }}">Next</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

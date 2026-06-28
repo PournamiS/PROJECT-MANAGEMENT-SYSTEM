@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Tasks — PMS{% endblock %}
+{% block page_title %}Tasks{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <p class="text-muted mb-0" style="font-size:14px;">
+    {% if user.is_admin %}All tasks across projects{% else %}Your assigned tasks{% endif %}
+  </p>
+  {% if user.is_admin %}
+  <a href="{% url 'task_create' %}" class="btn btn-primary btn-sm" style="background:#6366f1; border-color:#6366f1;">
+    <i class="bi bi-plus-lg me-1"></i> New Task
+  </a>
+  {% endif %}
+</div>
+
+<!-- Search & Filter -->
+<form class="mb-4 d-flex gap-2 flex-wrap" method="get">
+  <input type="text" name="q" value="{{ query }}" class="form-control" style="max-width:260px; font-size:14px;" placeholder="Search tasks...">
+  <select name="status" class="form-select w-auto" style="font-size:14px;">
+    <option value="">All statuses</option>
+    <option value="pending"     {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+    <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+    <option value="completed"   {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+  </select>
+  <button class="btn btn-outline-secondary btn-sm px-3">Filter</button>
+  {% if query or status_filter %}
+  <a href="{% url 'task_list' %}" class="btn btn-outline-danger btn-sm">Clear</a>
+  {% endif %}
+</form>
+
+<div class="page-card">
+  <table class="table table-hover mb-0" style="font-size:14px;">
+    <thead class="table-light">
+      <tr>
+        <th>Task</th>
+        <th>Project</th>
+        <th>Assigned To</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in tasks %}
+      <tr>
+        <td>
+          <strong>{{ task.title }}</strong>
+          {% if task.description %}
+          <br><small class="text-muted">{{ task.description|truncatechars:45 }}</small>
+          {% endif %}
+        </td>
+        <td><a href="{% url 'project_detail' task.project.pk %}" class="text-decoration-none">{{ task.project.name }}</a></td>
+        <td>{{ task.assigned_to.username|default:'—' }}</td>
+        <td><span class="badge-{{ task.status }}">{{ task.get_status_display }}</span></td>
+        <td><small class="text-muted">{{ task.created_at|date:"d M Y" }}</small></td>
+        <td>
+          <a href="{% url 'task_edit' task.pk %}" class="btn btn-sm btn-outline-secondary">
+            {% if user.is_admin %}Edit{% else %}Update{% endif %}
+          </a>
+          {% if user.is_admin %}
+          <a href="{% url 'task_delete' task.pk %}" class="btn btn-sm btn-outline-danger ms-1">Delete</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" class="text-center text-muted py-4">
+          <i class="bi bi-inbox d-block fs-2 mb-2"></i>No tasks found.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if tasks.has_other_pages %}
+<nav class="mt-4">
+  <ul class="pagination pagination-sm">
+    {% if tasks.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{ tasks.previous_page_number }}&q={{ query }}&status={{ status_filter }}">Previous</a></li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">Page {{ tasks.number }} of {{ tasks.paginator.num_pages }}</span></li>
+    {% if tasks.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ tasks.next_page_number }}&q={{ query }}&status={{ status_filter }}">Next</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

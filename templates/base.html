@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Project Management System{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body { background-color: #f1f5f9; font-family: 'Segoe UI', sans-serif; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px; min-width: 240px; min-height: 100vh;
+      background: #0f172a; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    }
+    .sidebar .brand {
+      font-size: 17px; font-weight: 700; color: #fff;
+      padding: 20px 22px; border-bottom: 1px solid #1e293b;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sidebar .brand i { color: #6366f1; font-size: 22px; }
+    .nav-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 1.2px;
+      text-transform: uppercase; color: #475569;
+      padding: 18px 22px 6px; display: block;
+    }
+    .sidebar a.nav-link {
+      color: #94a3b8; padding: 9px 14px; margin: 2px 10px;
+      border-radius: 8px; display: flex; align-items: center; gap: 10px;
+      font-size: 14px; transition: all 0.15s;
+    }
+    .sidebar a.nav-link:hover { background: #1e293b; color: #e2e8f0; }
+    .sidebar a.nav-link.active { background: #6366f1; color: #fff; }
+
+    /* Topbar */
+    .topbar {
+      background: #fff; border-bottom: 1px solid #e2e8f0;
+      padding: 12px 28px; display: flex; align-items: center;
+      justify-content: space-between; position: sticky; top: 0; z-index: 100;
+    }
+
+    /* Content */
+    .main-content { padding: 28px; }
+
+    /* Cards */
+    .stat-card { border: none; border-radius: 14px; }
+    .page-card  { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; }
+
+    /* Status badges */
+    .badge-pending     { background: #fef9c3; color: #854d0e; border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: 500; }
+    .badge-in_progress { background: #dbeafe; color: #1d4ed8; border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: 500; }
+    .badge-completed   { background: #dcfce7; color: #166534; border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: 500; }
+  </style>
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<div class="d-flex">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="brand"><i class="bi bi-kanban-fill"></i> PMS</div>
+    <div class="mt-2">
+      <span class="nav-label">Main</span>
+      <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a>
+      <a href="{% url 'project_list' %}" class="nav-link {% if 'project' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-folder2-open"></i> Projects
+      </a>
+      <a href="{% url 'task_list' %}" class="nav-link {% if 'task' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-check2-square"></i> Tasks
+      </a>
+      {% if user.is_admin %}
+      <span class="nav-label">Admin</span>
+      <a href="{% url 'user_list' %}" class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-people"></i> Users
+      </a>
+      {% endif %}
+      <span class="nav-label">Account</span>
+      <a href="{% url 'logout' %}" class="nav-link">
+        <i class="bi bi-box-arrow-right"></i> Logout
+      </a>
+    </div>
+  </div>
+
+  <!-- Main area -->
+  <div class="flex-grow-1" style="min-width:0;">
+    <div class="topbar">
+      <span class="fw-semibold text-dark">
+        {% block page_title %}{% endblock %}
+      </span>
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-person-circle text-secondary fs-5"></i>
+        <span class="text-muted" style="font-size:14px;">
+          {{ user.get_full_name|default:user.username }}
+        </span>
+        <span class="badge {% if user.role == 'admin' %}bg-danger{% else %}bg-primary{% endif %} ms-1" style="font-size:11px;">
+          {{ user.role|title }}
+        </span>
+      </div>
+    </div>
+
+    <div class="main-content">
+      {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show mb-3" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+</div>
+
+{% else %}
+  {% block auth_content %}{% endblock %}
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
